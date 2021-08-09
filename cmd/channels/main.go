@@ -80,4 +80,29 @@ func main() {
 	default:
 		fmt.Println("no activity")
 	}
+
+	jobs := make(chan int, 5)
+	doneAll := make(chan bool)
+
+	go func() {
+		for {
+			j, more := <-jobs
+			if more {
+				fmt.Println("received job", j)
+			} else {
+				fmt.Println("received all jobs")
+				doneAll <- true
+				return
+			}
+		}
+	}()
+
+	for i := 0; i <= 3; i++ {
+		jobs <- i
+		fmt.Println("sent job", i)
+	}
+
+	close(jobs)
+	fmt.Println("sent all jobs")
+	<-doneAll
 }
